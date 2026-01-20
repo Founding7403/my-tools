@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>饭卡计算器</title>
+    <title>饭卡计算器 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 全局设定 */
@@ -198,7 +198,7 @@
 
     <!-- 顶部极简标题 -->
     <div class="bg-white sticky top-0 z-20 border-b border-gray-200">
-        <div class="max-w-md mx-auto h-14 flex items-center justify-center">
+        <div class="max-w-md mx-auto h-14 flex items-center justify-center relative">
             <h1 class="text-level-1 text-gray-800 tracking-tight">饭卡计算器</h1>
         </div>
     </div>
@@ -286,7 +286,7 @@
             <div class="row-spread mb-3 items-center">
                 <div class="flex flex-col">
                     <span class="text-level-2 text-gray-700" style="font-size: 1rem;">请假日</span>
-                    <span class="text-level-3 text-gray-400">不吃饭的工作日</span>
+                    <span class="text-level-3 text-gray-400">工作日请假</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <button class="stepper-btn" style="width: 2.75rem; height: 2.75rem;" onclick="adjustDays('holidays', -1)">
@@ -306,7 +306,7 @@
             <div class="row-spread items-center">
                 <div class="flex flex-col">
                     <span class="text-level-2 text-gray-700" style="font-size: 1rem;">加班日</span>
-                    <span class="text-level-3 text-gray-400">额外吃饭的日子</span>
+                    <span class="text-level-3 text-gray-400">休息日加班</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <button class="stepper-btn" style="width: 2.75rem; height: 2.75rem;" onclick="adjustDays('extras', -1)">
@@ -329,6 +329,7 @@
         
         <div class="text-center text-level-3 text-gray-400 pb-2">
             需用餐 <span id="total_days" class="font-bold text-gray-600">--</span> 天
+            <span class="text-xs text-gray-400 block mt-1">(已自动处理2026节假日调休)</span>
         </div>
 
     </div>
@@ -356,7 +357,6 @@
             </div>
             
             <!-- 进度条：底色为绿（余额），上层为红（支出） -->
-            <!-- h-3 对应约 12px，比之前的 h-2.5 (10px) 粗了约 20% -->
             <div class="w-full bg-green-500 rounded-full h-3 overflow-hidden relative">
                 <div id="balance_bar" class="h-full transition-all duration-700 ease-out rounded-full bg-red-500" style="width: 0%"></div>
             </div>
@@ -377,11 +377,48 @@
             dinner: 18 * 60 + 30     // 18:30
         };
 
+        // --- 2026 节假日配置 ---
+        // 格式: 'YYYY-MM-DD'
+        // OFF_DAYS: 原本是工作日(周一至周五)，但放假
+        const OFF_DAYS = [
+            '2026-01-01', '2026-01-02', // 元旦
+            '2026-02-16', '2026-02-17', '2026-02-18', '2026-02-19', '2026-02-20', '2026-02-23', // 春节
+            '2026-04-06', // 清明补休
+            '2026-05-01', '2026-05-04', '2026-05-05', // 劳动节
+            '2026-06-19', // 端午节
+            '2026-09-25', // 中秋节
+            '2026-10-01', '2026-10-02', '2026-10-05', '2026-10-06', '2026-10-07' // 国庆节
+        ];
+
+        // ON_DAYS: 原本是周末(周六日)，但调休上班
+        const ON_DAYS = [
+            '2026-01-04', // 元旦调休
+            '2026-02-14', '2026-02-28', // 春节调休
+            '2026-05-09', // 劳动节调休
+            '2026-09-20', // 国庆调休
+            '2026-10-10'  // 国庆调休
+        ];
+
         const state = {
             meals: { breakfast: true, lunch: true, dinner: true }
         };
 
-        // 保存设置到 localStorage (只保存余额和用餐选项)
+        function isWorkDay(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            const dayOfWeek = date.getDay(); // 0=周日, 6=周六
+
+            // 1. 如果在“上班名单”里，绝对是工作日
+            if (ON_DAYS.includes(dateStr)) return true;
+
+            // 2. 如果在“放假名单”里，绝对是休息日
+            if (OFF_DAYS.includes(dateStr)) return false;
+
+            // 3. 剩下的按照常规：周六日休息，周一至周五上班
+            if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+            return true;
+        }
+
+        // 保存设置
         function saveSettings() {
             const settings = {
                 balance: document.getElementById('balance').value,
@@ -389,20 +426,16 @@
             };
             try {
                 localStorage.setItem('meal_card_settings', JSON.stringify(settings));
-            } catch (e) {
-                // 忽略存储错误
-            }
+            } catch (e) {}
         }
 
-        // 从 localStorage 加载设置
+        // 加载设置
         function loadSettings() {
             try {
                 const saved = localStorage.getItem('meal_card_settings');
                 if (saved) {
                     const settings = JSON.parse(saved);
-                    
                     if (settings.balance !== undefined) document.getElementById('balance').value = settings.balance;
-                    
                     if (settings.meals) {
                         state.meals = settings.meals;
                         ['breakfast', 'lunch', 'dinner'].forEach(type => {
@@ -421,16 +454,13 @@
                     }
                     return true;
                 }
-            } catch (e) {
-                console.error("加载配置失败", e);
-            }
+            } catch (e) {}
             return false;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
 
-            // 无论是否加载了配置，都强制初始化日期为当前月
             const now = new Date();
             const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
             
@@ -468,7 +498,6 @@
             let val = parseFloat(input.value) || 0;
             val += amount;
             if (val < 0) val = 0;
-            
             input.value = val.toFixed(1); 
             calculate();
         }
@@ -496,9 +525,10 @@
 
             let workDays = 0;
             let loopDate = new Date(startDate); 
+            
+            // 循环遍历每一天
             while (loopDate <= endDate) {
-                const day = loopDate.getDay();
-                if (day !== 0 && day !== 6) { 
+                if (isWorkDay(loopDate)) {
                     workDays++;
                 }
                 loopDate.setDate(loopDate.getDate() + 1);
@@ -518,12 +548,9 @@
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             const isTodayInStart = startDateStr === todayStr;
-            const isTodayInEnd = endDateStr >= todayStr;
-            
-            const dayOfWeek = now.getDay();
-            const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
-
-            if (isTodayInStart && !isWeekend) {
+            // 只有当今天也是“工作日”时，才进行智能时间扣除
+            // (如果是节假日/周末，本身已被排除，不需要再扣)
+            if (isTodayInStart && isWorkDay(now)) {
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
                 let deduction = 0;
 
@@ -555,7 +582,6 @@
                 resLabel.className = "text-level-3 mb-0.5 font-bold text-green-600";
                 resValue.innerHTML = `<span class="tracking-tighter text-green-600">${diff.toFixed(1)}</span><span class="text-level-2 font-bold text-gray-400 mb-1 ml-1">元</span>`;
                 
-                // 进度条逻辑：底色是绿（balance），红条显示支出占比
                 let pct = 0;
                 if (balance > 0) {
                     pct = (totalCost / balance) * 100;
@@ -563,14 +589,11 @@
                     pct = 100;
                 }
                 if (pct > 100) pct = 100;
-                
                 bar.style.width = pct + "%";
             } else {
                 resLabel.innerText = "余额不足 (缺口)";
                 resLabel.className = "text-level-3 mb-0.5 font-bold text-red-500";
                 resValue.innerHTML = `<span class="tracking-tighter text-red-500">${Math.abs(diff).toFixed(1)}</span><span class="text-level-2 font-bold text-gray-400 mb-1 ml-1">元</span>`;
-                
-                // 余额不足时，红条拉满
                 bar.style.width = "100%";
             }
 
