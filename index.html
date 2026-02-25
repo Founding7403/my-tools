@@ -2,125 +2,94 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>我的工具箱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-color: #f4f6f8;
-            --card-bg: #ffffff;
-            --text-main: #2c3e50;
-            --text-light: #7f8c8d;
-            --primary: #3498db;
+        /* 全局设定 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            font-size: 17px; 
+            line-height: 1.5;
+            background-color: #F3F4F6;
+            color: #1F2937;
+            -webkit-font-smoothing: antialiased;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeInDown 0.6s ease-out;
-        }
-
-        .header h1 {
-            margin: 0 0 10px 0;
-            font-size: 28px;
-            font-weight: 600;
-        }
-
-        .header p {
-            margin: 0;
-            color: var(--text-light);
-            font-size: 16px;
-        }
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-            width: 100%;
-            max-width: 900px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
+        .text-level-1 { font-size: 1.5rem; line-height: 2rem; font-weight: 900; } 
+        
         .tool-card {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
+            background-color: #FFFFFF;
+            padding: 1.5rem; 
+            border-radius: 1.25rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.03);
+            margin-bottom: 1rem; 
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             color: inherit;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
             border: 2px solid transparent;
         }
 
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            border-color: var(--primary);
+        .tool-card:active {
+            transform: scale(0.97);
+            background-color: #F9FAFB;
         }
 
-        .tool-icon {
-            font-size: 32px;
-            margin-bottom: 16px;
-        }
-
-        .tool-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-        }
-
-        .tool-desc {
-            font-size: 14px;
-            color: var(--text-light);
-            margin: 0;
-            line-height: 1.5;
-            flex-grow: 1;
-        }
-
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .tool-icon-wrap {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
         }
     </style>
 </head>
-<body>
+<body class="pb-10">
 
-    <div class="header">
-        <h1>🛠️ 我的在线工具箱</h1>
-        <p>日常实用小工具合集</p>
+    <!-- 顶部极简标题 -->
+    <div class="bg-white sticky top-0 z-20 border-b border-gray-200 shadow-sm">
+        <div class="max-w-md mx-auto h-14 flex items-center justify-center relative">
+            <h1 class="text-level-1 text-gray-800 tracking-tight">我的工具箱</h1>
+        </div>
     </div>
 
-    <div class="tools-grid">
-        <!-- 第一个工具：饭卡计算器 -->
-        <a href="fanka-calculator/" class="tool-card">
-            <div class="tool-icon">💳</div>
-            <h2 class="tool-title">饭卡计算器 2026</h2>
-            <p class="tool-desc">自动计算工作日、请假、加班，并智能处理节假日调休，预估饭卡余额与支出情况。</p>
-        </a>
+    <div class="max-w-md mx-auto px-4 py-6">
+        
+        <div class="mb-6 px-1">
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider">日常实用小工具合集</h2>
+        </div>
 
-        <!-- 第二个工具：比价工具 -->
-        <a href="price_compare/" class="tool-card">
-            <div class="tool-icon">💰</div>
-            <h2 class="tool-title">极简比价工具</h2>
-            <p class="tool-desc">自动换算商品基础单价，快速比较不同包装、不同规格的商品哪个更划算。</p>
-        </a>
+        <div class="flex flex-col gap-3">
+            <!-- 第一个工具：饭卡计算器 -->
+            <a href="fanka-calculator/" class="tool-card">
+                <div class="tool-icon-wrap bg-blue-50 border border-blue-100">💳</div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-bold text-gray-800 mb-1">饭卡计算器 2026</h2>
+                    <p class="text-sm text-gray-500 leading-snug">自动计算工作日、请假、加班，并智能处理节假日调休，预估饭卡余额与支出。</p>
+                </div>
+            </a>
+
+            <!-- 第二个工具：比价工具 -->
+            <a href="price_compare/" class="tool-card">
+                <div class="tool-icon-wrap bg-green-50 border border-green-100">💰</div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-bold text-gray-800 mb-1">比价工具</h2>
+                    <p class="text-sm text-gray-500 leading-snug">自动换算商品基础单价，快速比较不同包装、不同规格的商品哪个更划算。</p>
+                </div>
+            </a>
+            
+            <!-- 占位提示 -->
+            <div class="mt-4 p-4 border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center text-gray-400 text-sm font-medium">
+                更多工具开发中...
+            </div>
+        </div>
+
     </div>
 
 </body>
