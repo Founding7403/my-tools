@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的工具箱</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-light: #7f8c8d;
+            --primary: #3498db;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 16px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            width: 100%;
+            max-width: 900px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            border-color: var(--primary);
+        }
+
+        .tool-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+        }
+
+        .tool-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+
+        .tool-desc {
+            font-size: 14px;
+            color: var(--text-light);
+            margin: 0;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🛠️ 我的在线工具箱</h1>
+        <p>日常实用小工具合集</p>
+    </div>
+
+    <div class="tools-grid">
+        <!-- 第一个工具：饭卡计算器 -->
+        <a href="fanka-calculator/" class="tool-card">
+            <div class="tool-icon">💳</div>
+            <h2 class="tool-title">饭卡计算器 2026</h2>
+            <p class="tool-desc">自动计算工作日、请假、加班，并智能处理节假日调休，预估饭卡余额与支出情况。</p>
+        </a>
+
+        <!-- 第二个工具：比价工具 -->
+        <a href="price_compare/" class="tool-card">
+            <div class="tool-icon">💰</div>
+            <h2 class="tool-title">极简比价工具</h2>
+            <p class="tool-desc">自动换算商品基础单价，快速比较不同包装、不同规格的商品哪个更划算。</p>
+        </a>
+    </div>
+
+</body>
+</html>
