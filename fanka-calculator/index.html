@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>饭卡计算器 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 全局设定 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            font-size: 17px; 
+            line-height: 1.5;
+            background-color: #F3F4F6;
+            color: #1F2937;
+            padding-bottom: 220px; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 字体层级系统 */
+        .text-level-1 { font-size: 2rem; line-height: 2.25rem; font-weight: 900; } 
+        .text-level-2 { font-size: 1.05rem; font-weight: 700; } 
+        .text-level-3 { font-size: 0.85rem; color: #6B7280; font-weight: 500; } 
+
+        /* 卡片基础 */
+        .card {
+            background-color: #FFFFFF;
+            padding: 1.25rem; 
+            border-radius: 1rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 4px 8px rgba(0,0,0,0.02);
+            margin-bottom: 1rem; 
+        }
+
+        /* 标题对齐 */
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.875rem; 
+        }
+        .section-num {
+            background-color: #EFF6FF;
+            color: #2563EB;
+            font-weight: 800;
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            margin-right: 0.6rem;
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #374151;
+            letter-spacing: -0.01em;
+        }
+
+        /* ---------------------------------
+           组件样式
+        --------------------------------- */
+
+        /* 统一加减按钮 */
+        .stepper-btn {
+            width: 3.25rem; 
+            height: 3.25rem;
+            border-radius: 0.75rem;
+            background-color: #FFFFFF;
+            border: 2px solid #E5E7EB;
+            color: #6B7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0; 
+        }
+        .stepper-btn:active {
+            background-color: #F9FAFB;
+            transform: scale(0.96);
+            border-color: #D1D5DB;
+        }
+        .icon-svg {
+            width: 1.4rem;
+            height: 1.4rem;
+            stroke-width: 2.5;
+        }
+
+        /* 余额输入框 */
+        .input-balance {
+            width: 140px; 
+            text-align: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+            color: #1F2937;
+            font-family: inherit;
+            -moz-appearance: textfield;
+        }
+        .input-balance::-webkit-outer-spin-button,
+        .input-balance::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .input-balance:focus {
+            outline: none;
+            border-bottom: 2px solid #3B82F6;
+        }
+
+        /* 用餐大按钮 */
+        .meal-btn {
+            position: relative;
+            background-color: #FFFFFF;
+            border: 2px solid #F3F4F6;
+            border-radius: 0.875rem;
+            padding: 0.75rem 0.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 6.5rem; 
+        }
+        
+        /* Emoji 图标 */
+        .emoji-icon {
+            font-size: 2rem;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+        }
+
+        /* 选中态定义 */
+        .meal-btn.active-breakfast { 
+            background-color: #FFF7ED; border-color: #F97316; 
+        }
+        .meal-btn.active-breakfast .text-level-2 { color: #C2410C; }
+
+        .meal-btn.active-lunch { 
+            background-color: #FEF2F2; border-color: #EF4444; 
+        }
+        .meal-btn.active-lunch .text-level-2 { color: #B91C1C; }
+
+        .meal-btn.active-dinner { 
+            background-color: #EFF6FF; border-color: #3B82F6; 
+        }
+        .meal-btn.active-dinner .text-level-2 { color: #1D4ED8; }
+        
+        /* 未选中态 */
+        .meal-btn.inactive {
+            background-color: #FAFAFA;
+            border-color: #F3F4F6;
+            opacity: 0.7;
+        }
+        .meal-btn.inactive .emoji-icon { filter: grayscale(100%) opacity(0.6); }
+
+        /* ---------------------------------
+           底部悬浮栏
+        --------------------------------- */
+        .fixed-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #FFFFFF;
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.12), 0 -2px 10px rgba(0,0,0,0.05);
+            padding: 1.5rem 1.75rem;
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+            z-index: 50;
+        }
+        
+        .row-spread {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+        
+        input[type="date"] {
+            appearance: none;
+            background-color: #F9FAFB;
+            border: 2px solid #E5E7EB;
+            border-radius: 0.625rem;
+            padding: 0.5rem;
+            font-size: 0.95rem;
+            width: 100%;
+            color: #374151;
+            text-align: center;
+            font-weight: 600;
+            height: 3rem; 
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部极简标题 -->
+    <div class="bg-white sticky top-0 z-20 border-b border-gray-200">
+        <div class="max-w-md mx-auto h-14 flex items-center justify-center relative">
+            <h1 class="text-level-1 text-gray-800 tracking-tight">饭卡计算器</h1>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto px-4 py-5">
+
+        <!-- 卡片1：余额设置 (可输入) -->
+        <div class="card">
+            <div class="section-header">
+                <span class="section-num">1</span>
+                <span class="section-title">当前余额</span>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-2 flex items-center justify-between border border-gray-100">
+                <button class="stepper-btn" onclick="adjustBalance(-10)">
+                    <svg class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                    </svg>
+                </button>
+                
+                <!-- 中间数字区域 -->
+                <div class="flex-1 flex items-baseline justify-center">
+                    <input type="number" id="balance" value="1200.0" step="0.1" class="input-balance text-level-1" oninput="calculate()">
+                    <span class="ml-1 text-level-2 text-gray-500" style="transform: translateY(-2px)">元</span>
+                </div>
+                
+                <button class="stepper-btn" onclick="adjustBalance(10)">
+                    <svg class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+            </div>
+            <div class="text-center text-level-3 text-gray-400 mt-2" style="font-size: 0.75rem;">点击数字修改</div>
+        </div>
+
+        <!-- 卡片2：用餐选择 (Emoji版) -->
+        <div class="card">
+            <div class="section-header">
+                <span class="section-num">2</span>
+                <span class="section-title">每日用餐</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <!-- 早餐 -->
+                <div class="meal-btn active-breakfast" id="btn-breakfast" onclick="toggleMeal('breakfast')">
+                    <span class="emoji-icon">🥛</span>
+                    <span class="text-level-2">早餐</span>
+                    <span class="text-level-3 opacity-70 mt-0.5">12元</span>
+                </div>
+                <!-- 午餐 -->
+                <div class="meal-btn active-lunch" id="btn-lunch" onclick="toggleMeal('lunch')">
+                    <span class="emoji-icon">🍚</span>
+                    <span class="text-level-2">午餐</span>
+                    <span class="text-level-3 opacity-70 mt-0.5">20元</span>
+                </div>
+                <!-- 晚餐 -->
+                <div class="meal-btn active-dinner" id="btn-dinner" onclick="toggleMeal('dinner')">
+                    <span class="emoji-icon">🍜</span>
+                    <span class="text-level-2">晚餐</span>
+                    <span class="text-level-3 opacity-70 mt-0.5">8元</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片3：时间设置 -->
+        <div class="card">
+            <div class="section-header">
+                <span class="section-num">3</span>
+                <span class="section-title">计算范围</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                    <label class="block text-level-3 mb-1.5 pl-1">开始日期</label>
+                    <input type="date" id="start_date" onchange="calculate()">
+                </div>
+                <div>
+                    <label class="block text-level-3 mb-1.5 pl-1">结束日期</label>
+                    <input type="date" id="end_date" onchange="calculate()">
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 my-4"></div>
+
+            <!-- 调整项 -->
+            <div class="row-spread mb-3 items-center">
+                <div class="flex flex-col">
+                    <span class="text-level-2 text-gray-700" style="font-size: 1rem;">请假日</span>
+                    <span class="text-level-3 text-gray-400">工作日请假</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="stepper-btn" style="width: 2.75rem; height: 2.75rem;" onclick="adjustDays('holidays', -1)">
+                        <svg class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                        </svg>
+                    </button>
+                    <span id="holiday_display" class="text-level-2 w-7 text-center text-gray-700">0</span>
+                    <button class="stepper-btn" style="width: 2.75rem; height: 2.75rem;" onclick="adjustDays('holidays', 1)">
+                        <svg class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row-spread items-center">
+                <div class="flex flex-col">
+                    <span class="text-level-2 text-gray-700" style="font-size: 1rem;">加班日</span>
+                    <span class="text-level-3 text-gray-400">休息日加班</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button class="stepper-btn" style="width: 2.75rem; height: 2.75rem;" onclick="adjustDays('extras', -1)">
+                        <svg class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                        </svg>
+                    </button>
+                    <span id="extra_display" class="text-level-2 w-7 text-center text-gray-700">0</span>
+                    <button class="stepper-btn" style="width: 2.75rem; height: 2.75rem;" onclick="adjustDays('extras', 1)">
+                        <svg class="icon-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <input type="hidden" id="holidays" value="0">
+            <input type="hidden" id="extras" value="0">
+        </div>
+        
+        <div class="text-center text-level-3 text-gray-400 pb-2">
+            需用餐 <span id="total_days" class="font-bold text-gray-600">--</span> 天
+            <span class="text-xs text-gray-400 block mt-1">(已自动处理2026节假日调休)</span>
+        </div>
+
+    </div>
+
+    <!-- 底部结果栏 -->
+    <div class="fixed-bar">
+        <div class="max-w-md mx-auto">
+            <div class="row-spread mb-3">
+                <!-- 左侧：预计支出 -->
+                <div class="text-left">
+                    <div class="text-level-3 mb-0.5">预计总支出</div>
+                    <div class="text-level-2 text-gray-700">
+                        <span id="total_cost">0.0</span>
+                        <span class="text-sm font-normal ml-0.5">元</span>
+                    </div>
+                </div>
+
+                <!-- 右侧：余额结果 -->
+                <div class="text-right">
+                    <div id="result_label" class="text-level-3 mb-0.5 font-bold">卡内剩余</div>
+                    <div class="text-level-1 leading-none tracking-tight flex items-baseline justify-end gap-1" id="result_value">
+                        --
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 进度条：底色为绿（余额），上层为红（支出） -->
+            <div class="w-full bg-green-500 rounded-full h-3 overflow-hidden relative">
+                <div id="balance_bar" class="h-full transition-all duration-700 ease-out rounded-full bg-red-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PRICES = {
+            breakfast: 12,
+            lunch: 20,
+            dinner: 8
+        };
+
+        // 时间阈值 (分钟)
+        const THRESHOLDS = {
+            breakfast: 9 * 60,       // 9:00
+            lunch: 12 * 60 + 30,     // 12:30
+            dinner: 18 * 60 + 30     // 18:30
+        };
+
+        // --- 2026 节假日配置 ---
+        // 格式: 'YYYY-MM-DD'
+        // OFF_DAYS: 原本是工作日(周一至周五)，但放假
+        const OFF_DAYS = [
+            '2026-01-01', '2026-01-02', // 元旦
+            '2026-02-16', '2026-02-17', '2026-02-18', '2026-02-19', '2026-02-20', '2026-02-23', // 春节
+            '2026-04-06', // 清明补休
+            '2026-05-01', '2026-05-04', '2026-05-05', // 劳动节
+            '2026-06-19', // 端午节
+            '2026-09-25', // 中秋节
+            '2026-10-01', '2026-10-02', '2026-10-05', '2026-10-06', '2026-10-07' // 国庆节
+        ];
+
+        // ON_DAYS: 原本是周末(周六日)，但调休上班
+        const ON_DAYS = [
+            '2026-01-04', // 元旦调休
+            '2026-02-14', '2026-02-28', // 春节调休
+            '2026-05-09', // 劳动节调休
+            '2026-09-20', // 国庆调休
+            '2026-10-10'  // 国庆调休
+        ];
+
+        const state = {
+            meals: { breakfast: true, lunch: true, dinner: true }
+        };
+
+        function isWorkDay(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            const dayOfWeek = date.getDay(); // 0=周日, 6=周六
+
+            // 1. 如果在“上班名单”里，绝对是工作日
+            if (ON_DAYS.includes(dateStr)) return true;
+
+            // 2. 如果在“放假名单”里，绝对是休息日
+            if (OFF_DAYS.includes(dateStr)) return false;
+
+            // 3. 剩下的按照常规：周六日休息，周一至周五上班
+            if (dayOfWeek === 0 || dayOfWeek === 6) return false;
+            return true;
+        }
+
+        // 保存设置
+        function saveSettings() {
+            const settings = {
+                balance: document.getElementById('balance').value,
+                meals: state.meals
+            };
+            try {
+                localStorage.setItem('meal_card_settings', JSON.stringify(settings));
+            } catch (e) {}
+        }
+
+        // 加载设置
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem('meal_card_settings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    if (settings.balance !== undefined) document.getElementById('balance').value = settings.balance;
+                    if (settings.meals) {
+                        state.meals = settings.meals;
+                        ['breakfast', 'lunch', 'dinner'].forEach(type => {
+                            const btn = document.getElementById(`btn-${type}`);
+                            const activeClass = `active-${type}`;
+                            const inactiveClass = 'inactive';
+                            
+                            if (state.meals[type]) {
+                                btn.classList.add(activeClass);
+                                btn.classList.remove(inactiveClass);
+                            } else {
+                                btn.classList.remove(activeClass);
+                                btn.classList.add(inactiveClass);
+                            }
+                        });
+                    }
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+
+            const now = new Date();
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            document.getElementById('start_date').value = formatDate(now);
+            document.getElementById('end_date').value = formatDate(lastDay);
+            
+            calculate();
+        });
+
+        function toggleMeal(type) {
+            state.meals[type] = !state.meals[type];
+            const btn = document.getElementById(`btn-${type}`);
+            const activeClass = `active-${type}`;
+            const inactiveClass = 'inactive';
+
+            if (state.meals[type]) {
+                btn.classList.add(activeClass);
+                btn.classList.remove(inactiveClass);
+            } else {
+                btn.classList.remove(activeClass);
+                btn.classList.add(inactiveClass);
+            }
+            calculate();
+        }
+
+        function adjustBalance(amount) {
+            const input = document.getElementById('balance');
+            let val = parseFloat(input.value) || 0;
+            val += amount;
+            if (val < 0) val = 0;
+            input.value = val.toFixed(1); 
+            calculate();
+        }
+
+        function adjustDays(id, amount) {
+            const input = document.getElementById(id);
+            const display = document.getElementById(id === 'holidays' ? 'holiday_display' : 'extra_display');
+            let val = parseInt(input.value) || 0;
+            val += amount;
+            if (val < 0) val = 0;
+            input.value = val;
+            display.innerText = val;
+            calculate();
+        }
+
+        function calculate() {
+            const startDateStr = document.getElementById('start_date').value;
+            const endDateStr = document.getElementById('end_date').value;
+            
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+            const balance = parseFloat(document.getElementById('balance').value) || 0;
+            const holidays = parseInt(document.getElementById('holidays').value) || 0;
+            const extras = parseInt(document.getElementById('extras').value) || 0;
+
+            let workDays = 0;
+            let loopDate = new Date(startDate); 
+            
+            // 循环遍历每一天
+            while (loopDate <= endDate) {
+                if (isWorkDay(loopDate)) {
+                    workDays++;
+                }
+                loopDate.setDate(loopDate.getDate() + 1);
+            }
+
+            let actualDays = workDays - holidays + extras;
+            if (actualDays < 0) actualDays = 0;
+
+            let dailyCost = 0;
+            if (state.meals.breakfast) dailyCost += PRICES.breakfast;
+            if (state.meals.lunch) dailyCost += PRICES.lunch;
+            if (state.meals.dinner) dailyCost += PRICES.dinner;
+
+            let totalCost = actualDays * dailyCost;
+
+            // --- 智能扣除逻辑 ---
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const isTodayInStart = startDateStr === todayStr;
+            // 只有当今天也是“工作日”时，才进行智能时间扣除
+            // (如果是节假日/周末，本身已被排除，不需要再扣)
+            if (isTodayInStart && isWorkDay(now)) {
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                let deduction = 0;
+
+                if (state.meals.breakfast && currentMinutes > THRESHOLDS.breakfast) {
+                    deduction += PRICES.breakfast;
+                }
+                if (state.meals.lunch && currentMinutes > THRESHOLDS.lunch) {
+                    deduction += PRICES.lunch;
+                }
+                if (state.meals.dinner && currentMinutes > THRESHOLDS.dinner) {
+                    deduction += PRICES.dinner;
+                }
+                
+                totalCost -= deduction;
+            }
+
+            if (totalCost < 0) totalCost = 0;
+            const diff = balance - totalCost;
+
+            document.getElementById('total_days').innerText = actualDays;
+            document.getElementById('total_cost').innerText = totalCost.toFixed(1);
+
+            const resLabel = document.getElementById('result_label');
+            const resValue = document.getElementById('result_value');
+            const bar = document.getElementById('balance_bar');
+
+            if (diff >= 0) {
+                resLabel.innerText = "余额剩余";
+                resLabel.className = "text-level-3 mb-0.5 font-bold text-green-600";
+                resValue.innerHTML = `<span class="tracking-tighter text-green-600">${diff.toFixed(1)}</span><span class="text-level-2 font-bold text-gray-400 mb-1 ml-1">元</span>`;
+                
+                let pct = 0;
+                if (balance > 0) {
+                    pct = (totalCost / balance) * 100;
+                } else if (totalCost > 0) {
+                    pct = 100;
+                }
+                if (pct > 100) pct = 100;
+                bar.style.width = pct + "%";
+            } else {
+                resLabel.innerText = "余额不足 (缺口)";
+                resLabel.className = "text-level-3 mb-0.5 font-bold text-red-500";
+                resValue.innerHTML = `<span class="tracking-tighter text-red-500">${Math.abs(diff).toFixed(1)}</span><span class="text-level-2 font-bold text-gray-400 mb-1 ml-1">元</span>`;
+                bar.style.width = "100%";
+            }
+
+            saveSettings();
+        }
+    </script>
+</body>
+</html>
