@@ -2,418 +2,207 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>极简比价工具</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>极简比价</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --primary-color: #3498db;
-            --success-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-main: #2c3e50;
-            --text-light: #7f8c8d;
-            --border-color: #e0e6ed;
+        /* 全局设定与饭卡计算器统一 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            font-size: 17px; 
+            line-height: 1.5;
+            background-color: #F3F4F6;
+            color: #1F2937;
+            padding-bottom: 60px; 
+            -webkit-font-smoothing: antialiased;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 500px;
-        }
-
-        h2 {
-            text-align: center;
-            font-weight: 500;
-            margin-bottom: 24px;
-            color: var(--text-main);
-        }
-
+        .text-level-1 { font-size: 1.5rem; line-height: 2rem; font-weight: 900; } 
+        
+        /* 卡片基础 */
         .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 24px;
+            background-color: #FFFFFF;
+            padding: 1.25rem; 
+            border-radius: 1rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 4px 8px rgba(0,0,0,0.02);
+            margin-bottom: 1rem; 
         }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: all 0.2s ease;
-            outline: none;
-            background-color: #fcfcfc;
-        }
-
-        input:focus {
-            border-color: var(--primary-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        .input-row {
+        /* 标题对齐 */
+        .section-header {
             display: flex;
-            gap: 12px;
-        }
-
-        .input-row .form-group {
-            flex: 1;
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            font-weight: 600;
-        }
-
-        button:hover {
-            background-color: #2980b9;
-        }
-
-        .list-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding: 0 4px;
+            margin-bottom: 1rem; 
         }
-
-        .list-header h3 {
-            margin: 0;
-            font-size: 16px;
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        .btn-clear {
-            width: auto;
-            padding: 6px 12px;
-            background-color: transparent;
-            color: var(--text-light);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: normal;
-        }
-
-        .btn-clear:hover {
-            background-color: #f1f2f6;
-            color: var(--text-main);
-        }
-
-        .result-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .result-item {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        .section-num {
+            background-color: #EFF6FF;
+            color: #2563EB;
+            font-weight: 800;
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
+            justify-content: center;
+            font-size: 0.9rem;
+            margin-right: 0.6rem;
+            flex-shrink: 0;
         }
-
-        .result-item.best-deal {
-            border-color: var(--success-color);
-            background-color: #f4fdf7;
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.15);
-        }
-
-        .best-badge {
-            font-size: 12px;
-            background-color: var(--success-color);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            display: inline-flex;
-            align-items: center;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .item-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .item-name {
-            font-weight: 600;
-            font-size: 16px;
-            color: var(--text-main);
-        }
-
-        .item-details {
-            font-size: 13px;
-            color: var(--text-light);
-            margin-top: 6px;
-        }
-
-        .price-section {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-        }
-
-        .item-price {
-            font-size: 20px;
+        .section-title {
+            font-size: 1.05rem;
             font-weight: 700;
-            color: var(--primary-color);
-            text-align: right;
-            font-variant-numeric: tabular-nums;
+            color: #374151;
+            letter-spacing: -0.01em;
         }
 
-        .item-actions {
-            display: flex;
-            gap: 8px;
+        /* 统一输入框样式 */
+        .input-box {
+            width: 100%;
+            background-color: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            color: #1F2937;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .input-box:focus {
+            background-color: #FFFFFF;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .edit-btn {
-            background: rgba(52, 152, 219, 0.1);
-            color: var(--primary-color);
-            border: none;
-            font-size: 13px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: auto;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        
-        .edit-btn:hover {
-            background: rgba(52, 152, 219, 0.2);
-        }
-
-        .delete-btn {
-            background: #ffeaa7;
-            background: rgba(231, 76, 60, 0.1);
-            color: var(--danger-color);
-            border: none;
-            font-size: 13px;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: auto;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        
-        .delete-btn:hover {
-            background: rgba(231, 76, 60, 0.2);
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .btn-cancel-edit {
-            background-color: #ecf0f1;
-            color: var(--text-main);
-            display: none;
-        }
-
-        .btn-cancel-edit:hover {
-            background-color: #bdc3c7;
+        /* 标签文字 */
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            color: #6B7280;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            padding-left: 0.25rem;
         }
 
         /* 悬浮提示 Toast */
-        .toast {
-            position: fixed;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--danger-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
-            transition: top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 1000;
-        }
-
-        .toast.show {
-            top: 20px;
-        }
-
-        /* 自定义确认模态框 */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
+        #toast {
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: translate(-50%, -100px);
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease;
+        }
+        #toast.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
         }
 
-        .modal-overlay.show {
+        /* 模态框 */
+        #confirmModal {
+            transition: opacity 0.2s ease;
+        }
+        #confirmModal > div {
+            transition: transform 0.2s ease;
+            transform: scale(0.95);
+        }
+        #confirmModal.show {
             opacity: 1;
             pointer-events: auto;
         }
-
-        .modal {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 320px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transform: translateY(20px);
-            transition: transform 0.2s ease;
-        }
-
-        .modal-overlay.show .modal {
-            transform: translateY(0);
-        }
-
-        .modal p {
-            margin: 0 0 20px 0;
-            font-size: 16px;
-            color: var(--text-main);
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-actions button {
-            flex: 1;
-            padding: 10px;
-        }
-
-        .btn-cancel {
-            background-color: #ecf0f1;
-            color: var(--text-main);
-        }
-
-        .btn-cancel:hover {
-            background-color: #bdc3c7;
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-        }
-
-        .btn-danger:hover {
-            background-color: #c0392b;
+        #confirmModal.show > div {
+            transform: scale(1);
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>极简比价工具</h2>
-    
-    <div class="card">
-        <div class="form-group">
-            <label>商品名称 / 平台 (可选填)</label>
-            <input type="text" id="itemName" placeholder="例如：天猫 清风3层" autocomplete="off">
+    <!-- 顶部返回与标题 -->
+    <div class="bg-white sticky top-0 z-20 border-b border-gray-200">
+        <div class="max-w-md mx-auto h-14 flex items-center justify-between px-4 relative">
+            <h1 class="text-level-1 text-gray-800 tracking-tight mx-auto text-xl">极简比价</h1>
         </div>
+    </div>
+
+    <div class="max-w-md mx-auto px-4 py-5">
         
-        <div class="form-group">
-            <label>实际支付总价 (元)</label>
-            <input type="number" id="totalPrice" placeholder="0.00" step="0.01" min="0">
-        </div>
-        
-        <div class="input-row">
-            <div class="form-group">
-                <label>包装数量 (几包/瓶)</label>
-                <input type="number" id="packCount" placeholder="1" min="1" value="1">
+        <!-- 卡片1：录入商品 -->
+        <div class="card">
+            <div class="section-header">
+                <span class="section-num">1</span>
+                <span class="section-title">添加比价商品</span>
             </div>
-            <div class="form-group">
-                <label>单件规格 (抽/毫升)</label>
-                <input type="number" id="unitSize" placeholder="100" min="1">
+            
+            <div class="space-y-3.5">
+                <div>
+                    <label class="form-label">商品名称 / 平台 (可选)</label>
+                    <input type="text" id="itemName" placeholder="例如：天猫 清风3层" class="input-box" autocomplete="off">
+                </div>
+                
+                <div>
+                    <label class="form-label">实际支付总价 (元)</label>
+                    <input type="number" id="totalPrice" placeholder="0.00" step="0.01" min="0" class="input-box" inputmode="decimal">
+                </div>
+                
+                <div class="flex gap-3">
+                    <div class="flex-1">
+                        <label class="form-label">包装数 (包/瓶)</label>
+                        <input type="number" id="packCount" placeholder="1" min="1" value="1" class="input-box" inputmode="numeric">
+                    </div>
+                    <div class="flex-1">
+                        <label class="form-label">单件规格 (抽/ml)</label>
+                        <input type="number" id="unitSize" placeholder="100" min="1" class="input-box" inputmode="numeric">
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 pt-2">
+                    <button id="mainBtn" onclick="calculateAndSave()" class="flex-1 bg-blue-600 text-white font-bold rounded-xl py-3.5 active:scale-95 transition-transform shadow-sm flex items-center justify-center gap-1">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        计算并加入
+                    </button>
+                    <button id="cancelEditBtn" onclick="cancelEdit()" class="hidden flex-1 bg-gray-100 text-gray-600 font-bold rounded-xl py-3.5 active:scale-95 transition-transform border border-gray-200">
+                        取消修改
+                    </button>
+                </div>
             </div>
         </div>
-        
-        <div class="form-actions">
-            <button id="mainBtn" onclick="calculateAndSave()">计算并加入对比</button>
-            <button id="cancelEditBtn" class="btn-cancel-edit" onclick="cancelEdit()">取消修改</button>
+
+        <!-- 卡片2：比价结果区 -->
+        <div id="listHeader" style="display: none;">
+            <div class="flex justify-between items-center mb-2 px-1 mt-6">
+                <div class="section-header !mb-0">
+                    <span class="section-num !bg-green-50 !text-green-600">2</span>
+                    <span class="section-title">比价结果 <span class="text-sm font-normal text-gray-400 ml-1">(由低到高)</span></span>
+                </div>
+                <button onclick="openModal()" class="text-xs font-bold text-gray-400 hover:text-red-500 px-2.5 py-1.5 rounded-lg bg-gray-200/50 active:bg-gray-300 transition-colors">清空</button>
+            </div>
+            
+            <ul class="space-y-3" id="resultList">
+                <!-- 结果将动态渲染在这里 -->
+            </ul>
         </div>
     </div>
 
-    <div class="list-header" id="listHeader" style="display: none;">
-        <h3>比价结果 (自动排序)</h3>
-        <button class="btn-clear" onclick="openModal()">清空记录</button>
+    <!-- 悬浮错误提示 -->
+    <div id="toast" class="fixed top-5 left-1/2 bg-red-500 text-white px-6 py-3 rounded-xl shadow-[0_8px_30px_rgba(239,68,68,0.3)] font-bold z-50 flex items-center gap-2 text-sm w-max max-w-[90vw]">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <span id="toastMsg">错误提示</span>
     </div>
 
-    <ul class="result-list" id="resultList">
-        <!-- 结果将动态渲染在这里 -->
-    </ul>
-</div>
-
-<!-- 错误提示组件 -->
-<div id="toast" class="toast">错误提示</div>
-
-<!-- 确认清空模态框 -->
-<div id="confirmModal" class="modal-overlay">
-    <div class="modal">
-        <p>确定要清空所有比价记录吗？</p>
-        <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeModal()">取消</button>
-            <button class="btn-danger" onclick="executeClearAll()">清空</button>
+    <!-- 确认清空模态框 -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+        <div class="bg-white p-6 rounded-2xl w-11/12 max-w-[320px] shadow-2xl">
+            <h3 class="text-lg font-bold text-gray-800 text-center mb-2">清空记录</h3>
+            <p class="text-gray-500 text-sm text-center mb-6">确定要清空当前所有的比价记录吗？清空后无法恢复。</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl active:scale-95 transition-transform">取消</button>
+                <button onclick="executeClearAll()" class="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl active:scale-95 transition-transform shadow-[0_4px_12px_rgba(239,68,68,0.2)]">确定清空</button>
+            </div>
         </div>
     </div>
-</div>
 
 <script>
     const STORAGE_KEY = 'price_compare_data_v1';
     let compareList = [];
     let editingId = null;
 
-    // 初始化时尝试从 localStorage 读取数据
     function loadData() {
         try {
             const savedData = localStorage.getItem(STORAGE_KEY);
@@ -421,37 +210,24 @@
                 compareList = JSON.parse(savedData);
                 renderList();
             }
-        } catch (e) {
-            console.error('读取本地数据失败', e);
-        }
+        } catch (e) { console.error(e); }
     }
 
-    // 保存数据到 localStorage
     function saveData() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(compareList));
     }
 
-    // 显示 Toast 提示
     let toastTimeout;
     function showToast(message) {
         const toast = document.getElementById('toast');
-        toast.textContent = message;
+        document.getElementById('toastMsg').textContent = message;
         toast.classList.add('show');
-        
         clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    // 模态框控制
-    function openModal() {
-        document.getElementById('confirmModal').classList.add('show');
-    }
-
-    function closeModal() {
-        document.getElementById('confirmModal').classList.remove('show');
-    }
+    function openModal() { document.getElementById('confirmModal').classList.add('show'); }
+    function closeModal() { document.getElementById('confirmModal').classList.remove('show'); }
 
     function executeClearAll() {
         compareList = [];
@@ -466,54 +242,26 @@
         const packInput = parseFloat(document.getElementById('packCount').value) || 1;
         const sizeInput = parseFloat(document.getElementById('unitSize').value) || 1;
 
-        if (isNaN(priceInput) || priceInput <= 0) {
-            showToast('请输入正确的总价！');
-            return;
-        }
-        if (packInput <= 0 || sizeInput <= 0) {
-            showToast('数量和规格必须大于0！');
-            return;
-        }
+        if (isNaN(priceInput) || priceInput <= 0) return showToast('请输入正确的总价！');
+        if (packInput <= 0 || sizeInput <= 0) return showToast('数量和规格必须大于0！');
 
-        // 计算基础单位价格 (元/基础单位)
         const totalUnits = packInput * sizeInput;
         const unitPrice = priceInput / totalUnits;
 
         if (editingId !== null) {
-            // 更新现有项目
             const index = compareList.findIndex(item => item.id === editingId);
             if (index !== -1) {
-                compareList[index] = {
-                    ...compareList[index],
-                    name: nameInput,
-                    totalPrice: priceInput,
-                    packCount: packInput,
-                    unitSize: sizeInput,
-                    totalUnits: totalUnits,
-                    unitPrice: unitPrice
-                };
+                compareList[index] = { ...compareList[index], name: nameInput, totalPrice: priceInput, packCount: packInput, unitSize: sizeInput, totalUnits: totalUnits, unitPrice: unitPrice };
             }
-            cancelEdit(); // 退出编辑状态
+            cancelEdit();
         } else {
-            // 新增项目
-            const item = {
-                id: Date.now(),
-                name: nameInput,
-                totalPrice: priceInput,
-                packCount: packInput,
-                unitSize: sizeInput,
-                totalUnits: totalUnits,
-                unitPrice: unitPrice
-            };
-            compareList.push(item);
-            
-            // 清空输入框以便录入下一个 (保留包装数量和单件规格)
+            compareList.push({ id: Date.now(), name: nameInput, totalPrice: priceInput, packCount: packInput, unitSize: sizeInput, totalUnits: totalUnits, unitPrice: unitPrice });
             document.getElementById('itemName').value = '';
             document.getElementById('totalPrice').value = '';
             document.getElementById('itemName').focus();
         }
 
-        saveData(); // 保存到本地
+        saveData();
         renderList();
     }
 
@@ -521,25 +269,20 @@
         const item = compareList.find(i => i.id === id);
         if (!item) return;
 
-        // 将数据回填到表单
         document.getElementById('itemName').value = item.name === '未命名商品' ? '' : item.name;
         document.getElementById('totalPrice').value = item.totalPrice;
         document.getElementById('packCount').value = item.packCount || 1;
-        document.getElementById('unitSize').value = item.unitSize || item.totalUnits; // 兼容旧数据
+        document.getElementById('unitSize').value = item.unitSize || item.totalUnits; 
 
-        // 切换为编辑状态
         editingId = id;
-        document.getElementById('mainBtn').textContent = '保存修改';
+        document.getElementById('mainBtn').innerHTML = '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 保存修改';
         document.getElementById('cancelEditBtn').style.display = 'block';
-        
-        // 平滑滚动到顶部
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('itemName').focus();
     }
 
     function cancelEdit() {
         editingId = null;
-        document.getElementById('mainBtn').textContent = '计算并加入对比';
+        document.getElementById('mainBtn').innerHTML = '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> 计算并加入';
         document.getElementById('cancelEditBtn').style.display = 'none';
         document.getElementById('itemName').value = '';
         document.getElementById('totalPrice').value = '';
@@ -547,7 +290,7 @@
 
     function deleteItem(id) {
         compareList = compareList.filter(item => item.id !== id);
-        saveData(); // 保存到本地
+        saveData();
         renderList();
     }
 
@@ -561,47 +304,43 @@
             return;
         }
 
-        listHeader.style.display = 'flex';
-
-        // 按单价从小到大排序
+        listHeader.style.display = 'block';
         compareList.sort((a, b) => a.unitPrice - b.unitPrice);
 
         compareList.forEach((item, index) => {
-            // 如果不止一个商品，排第一的就是最划算
             const isBestDeal = index === 0 && compareList.length > 1;
-            
             const li = document.createElement('li');
-            li.className = `result-item ${isBestDeal ? 'best-deal' : ''}`;
             
-            // 格式化单价展示：如果是极小数值使用科学计数法，否则保留 4 位小数
-            let displayUnitPrice = item.unitPrice < 0.0001 
-                ? item.unitPrice.toExponential(2) 
-                : parseFloat(item.unitPrice.toFixed(4));
+            // 使用 Tailwind 类名构建卡片样式
+            const baseClass = "p-4 rounded-[1rem] flex justify-between items-center transition-all";
+            const normalClass = "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.02),0_4px_8px_rgba(0,0,0,0.02)] border border-transparent";
+            const bestClass = "bg-green-50/50 shadow-[0_4px_12px_rgba(34,197,94,0.1)] border-2 border-green-400 transform scale-[1.01]";
+            
+            li.className = `${baseClass} ${isBestDeal ? bestClass : normalClass}`;
+            
+            let displayUnitPrice = item.unitPrice < 0.0001 ? item.unitPrice.toExponential(2) : parseFloat(item.unitPrice.toFixed(4));
 
             li.innerHTML = `
-                <div class="item-info">
-                ${isBestDeal ? '<span class="best-badge">👑 最划算</span>' : ''}
-                <span class="item-name">${item.name}</span>
-                <span class="item-details">总价 ¥${item.totalPrice} / 共 ${item.totalUnits} 基础单位</span>
-            </div>
-            <div class="price-section">
-                <div class="item-price">
-                    <span style="font-size: 14px; font-weight: normal; color: var(--text-light);">¥ </span>${displayUnitPrice}
+                <div class="flex flex-col items-start pr-2">
+                    ${isBestDeal ? '<span class="bg-green-500 text-white text-[11px] px-2 py-0.5 rounded-md font-bold mb-1.5 shadow-sm tracking-wide">👑 最划算</span>' : ''}
+                    <span class="font-bold text-gray-800 leading-tight">${item.name}</span>
+                    <span class="text-xs text-gray-500 mt-1.5">¥${item.totalPrice} / ${item.totalUnits} 单位</span>
                 </div>
-                <div class="item-actions">
-                    <button class="edit-btn" onclick="editItem(${item.id})">编辑</button>
-                    <button class="delete-btn" onclick="deleteItem(${item.id})">删除</button>
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                    <div class="text-[1.3rem] font-black tracking-tight ${isBestDeal ? 'text-green-600' : 'text-blue-600'}">
+                        <span class="text-xs font-normal ${isBestDeal ? 'text-green-400' : 'text-gray-400'} mr-0.5">¥</span>${displayUnitPrice}
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg active:scale-95 transition-transform" onclick="editItem(${item.id})">编辑</button>
+                        <button class="px-3 py-1.5 bg-red-50 text-red-500 text-xs font-bold rounded-lg active:scale-95 transition-transform" onclick="deleteItem(${item.id})">删除</button>
+                    </div>
                 </div>
-            </div>
-        `;
-        listElement.appendChild(li);
+            `;
+            listElement.appendChild(li);
         });
     }
 
-    // 页面加载完毕后执行初始化
     window.onload = loadData;
-
 </script>
-
 </body>
 </html>
